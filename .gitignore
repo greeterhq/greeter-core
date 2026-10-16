@@ -22,3 +22,6 @@ Thumbs.db
 .vscode/
 *.swp
 *.swo
+
+# Kiro local caches (keep steering, hooks, specs tracked)
+.kiro/**/cache/
