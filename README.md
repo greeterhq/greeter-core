@@ -1,5 +1,7 @@
 # greeter-core
 
+[![CI](https://github.com/greeterhq/greeter-core/actions/workflows/ci.yml/badge.svg)](https://github.com/greeterhq/greeter-core/actions/workflows/ci.yml)
+
 Pure domain core and ports for the Greeter application.
 
 ## Usage
