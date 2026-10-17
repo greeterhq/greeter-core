@@ -47,4 +47,6 @@ fileignoreconfig:
   checksum: aa7ce6008d91f8eaa49bcdc8f12726c6576b7f7d98d2bce79a8b35eaf2ffc312
 - filename: .kiro/prompts/opsx-bulk-archive.prompt.md
   checksum: f3ce90a87aa724e89e064c9c25ea60217cc8cfbaf82f8b9aa21b6fca25173aaa
+- filename: README.md
+  checksum: 3d692725e20da022ceb97d80626c9a11693e14a3d02c759f20ed12fe2aefeeb3
 version: ""

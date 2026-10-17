@@ -4,20 +4,75 @@
 
 Pure domain core and ports for the Greeter application.
 
-## Usage
-```ruby
-require 'greeter/core'
+## Quick start
 
-clock    = my_clock # any object responding to #now
+Install the gem from rubygems.org, then start an `irb` session that greets
+Alice Bonsu. The gem is pure domain logic with no I/O, so the session drives it
+with the bundled `FixedClock` test double — no adapter required. `GreetingService`
+accepts any `clock:` that responds to `#now`; a real app injects its own.
+
+```bash
+gem install greeter-core
+
+irb -r greeter/core -r greeter/core/testing <<'RUBY'
+clock    = Greeter::Core::Testing::FixedClock.new
 service  = Greeter::Core::Domain::GreetingService.new(clock: clock)
-greeting = service.greet('alice')
-greeting.guest_name.display # => "Alice"
+greeting = service.greet('alice bonsu')
+puts greeting.guest_name.display   # => Alice Bonsu
+RUBY
 ```
 
-## Testing helpers
+## Install locally and try it in irb
+
+Build the gem from the gemspec and install the resulting `.gem` into your local
+RubyGems, then explore it in an `irb` session. This gem is pure domain + ports
+with no I/O, so the `irb` walkthrough drives it with the bundled `FixedClock`
+test double — no adapter required.
+
+### 1. Build and install from source
+
+```bash
+# from the greeter-core root
+gem build greeter-core.gemspec        # => greeter-core-<version>.gem
+gem install ./greeter-core-*.gem      # installs into your local RubyGems
+```
+
+### 2. Use it in an irb session
+
+Start `irb` with the library required (the gem is not auto-loaded into a plain
+`irb`):
+
+```bash
+irb -r greeter/core -r greeter/core/testing
+```
+
+Then, in the session:
+
 ```ruby
+# A clock is injected; the testing double returns a fixed time (no Time.now).
+clock   = Greeter::Core::Testing::FixedClock.new
+service = Greeter::Core::Domain::GreetingService.new(clock: clock)
+
+greeting = service.greet('alice bonsu')
+greeting.guest_name.display   # => "Alice Bonsu"
+greeting.greeted_at           # => 2024-06-01 09:00:00 UTC
+
+# Names are validated; invalid input raises InvalidGuestName.
+service.greet('')             # => raises Greeter::Core::Domain::InvalidGuestName
+```
+
+If you prefer not to pass `-r` flags, start a bare `irb` and require the files
+from inside the session instead:
+
+```ruby
+require 'greeter/core'
 require 'greeter/core/testing'
-clock = Greeter::Core::Testing::FixedClock.new
+```
+
+### Uninstall
+
+```bash
+gem uninstall greeter-core
 ```
 
 ## Install, verify, commit
@@ -31,18 +86,22 @@ clock = Greeter::Core::Testing::FixedClock.new
 `bundle exec rubocop`
 
 ### smoke-test the packaged load path resolves and behaves
-`bundle exec ruby -Ilib -e "require 'greeter/core'; puts Greeter::Core::Domain::GuestName.new('alice bonsu').display" # => Alice Bonsu
+```bash
+bundle exec ruby -Ilib -e "require 'greeter/core'; puts Greeter::Core::Domain::GuestName.new('alice bonsu').display" # => Alice Bonsu
+```
 
-## confirm the gem builds cleanly
+### confirm the gem builds cleanly
+```bash
 gem build greeter-core.gemspec
+```
 
 
 ## Publishing to RubyGems.org
 
 The `publish` job in `.github/workflows/ci.yml` publishes the gem to
 [rubygems.org](https://rubygems.org). It runs **only when a version tag is
-pushed** (a tag matching `v*`, e.g. `v0.1.0`) and **only after** the `spec`,
-`lint`, and `perf` jobs pass.
+pushed** (a tag matching `v*`, e.g. `v0.1.0`) and **only after** the `lint`,
+`functional`, and `performance` jobs pass.
 
 Publishing uses RubyGems **trusted publishing** (OIDC): GitHub Actions proves its
 identity to RubyGems and receives a short-lived, single-use API key at run time.
@@ -53,28 +112,16 @@ No long-lived RubyGems API key is stored in GitHub.
 - Sign up / sign in at <https://rubygems.org>.
 - Enable MFA on the account (RubyGems requires it for publishing).
 
-### 2. Reserve the gem name (first release only)
+### 2. Configure trusted publishing on RubyGems (one time)
 
-Trusted publishing can only be configured on a gem that already exists on
-rubygems.org. For the very first `0.1.0` release, do a one-time manual push from
-your machine so the name is registered:
-
-```bash
-gem build greeter-core.gemspec
-gem signin
-gem push greeter-core-0.1.0.gem   # prompts for RubyGems credentials + MFA
-```
-
-After that, all future releases go through the automated workflow below.
-
-### 3. Configure trusted publishing on RubyGems (one time)
-
-On rubygems.org, open the gem page → **Trusted publishers** → **Create**, and add
-a GitHub Actions publisher matching this repo and workflow:
+The gem is already registered on rubygems.org
+(<https://rubygems.org/gems/greeter-core>). Open the gem page → **Trusted
+publishers** → **Create**, and add a GitHub Actions publisher matching this repo
+and workflow:
 
 | Field | Value |
 | --- | --- |
-| Repository owner | your GitHub username/org |
+| Repository owner | `greeterhq` |
 | Repository name | `greeter-core` |
 | Workflow filename | `ci.yml` |
 | Environment | `rubygems` |
@@ -82,7 +129,7 @@ a GitHub Actions publisher matching this repo and workflow:
 The **Environment** must match the `environment: rubygems` set on the `publish`
 job in the workflow.
 
-### 4. Create the matching GitHub environment (one time)
+### 3. Create the matching GitHub environment (one time)
 
 In the GitHub repo: **Settings → Environments → New environment**, name it
 `rubygems`. No secrets are needed — trusted publishing supplies the credential.
@@ -91,7 +138,7 @@ restrict to tags matching `v*`) so releases require approval.
 
 There are **no repository secrets to add** for publishing.
 
-### 5. Release a new version
+### 4. Release a new version
 
 1. Bump `VERSION` in `lib/greeter/core/version.rb` (the workflow fails if the tag
    and gem version disagree).
@@ -103,7 +150,7 @@ There are **no repository secrets to add** for publishing.
    git push origin v0.1.0
    ```
 
-The `publish` job runs after the test/lint/perf gate and publishes
+The `publish` job runs after the lint/functional/performance gate and publishes
 `greeter-core-<version>` to rubygems.org via trusted publishing.
 
 ### Consuming the published gem
