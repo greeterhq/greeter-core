@@ -25,3 +25,6 @@ Thumbs.db
 
 # Kiro local caches (keep steering, hooks, specs tracked)
 .kiro/**/cache/
+
+# Benchmarks output
+/tmp/
