@@ -2,26 +2,53 @@ schema: spec-driven
 
 context: |
   See AGENTS.md for full project conventions. Summary:
-  - This is greeter-core: the pure domain + ports gem (namespace Greeter::Core).
+  - This is greeter-core: the pure domain + ports gem (namespace Greeter::Core),
+    published to RubyGems by trusted publishing on version tags. Consumed by
+    greeter-cli and greeter-http with a pessimistic constraint (~> 0.1).
   - Zero runtime gems, zero I/O, no AWS, no Time.now anywhere in lib/.
-  - Two layers only: domain (value objects + use case) and ports (abstract
-    interfaces whose unimplemented methods raise NotImplementedError).
+  - Two layers only: domain (GuestName, Greeting, GreetingService) and ports
+    (Clock, GreetingPresenter) whose unimplemented methods raise NotImplementedError.
   - Adapters (CLI, HTTP/Lambda, DynamoDB, SystemClock) live in consuming apps,
-    NOT here. Test doubles (FakeClock, FixedClock) ship under
-    Greeter::Core::Testing.
+    NOT here. Test doubles (FakeClock, FixedClock) ship under Greeter::Core::Testing.
   - All collaborators injected via constructor keyword arguments; no globals.
-  - TDD: failing RSpec example before implementation, same commit.
-  - Traceability: every OpenSpec scenario maps to exactly one RSpec example
-    (this gem has no Cucumber; behaviour is exercised without any adapter).
+  - Name rules owned here and referenced (not re-specified) by every app:
+    strip surrounding whitespace, title-case for display, reject empty or
+    whitespace-only, reject more than 64 characters, reject control/escape characters.
+  - TDD: failing RSpec example committed before the implementation
+    (test(<change>): red, then feat(<change>): ...).
+  - Traceability: every OpenSpec scenario maps to exactly one RSpec example,
+    tagged with metadata requirement: '<requirement-slug>', scenario: '<scenario-slug>'.
+    This gem has no Cucumber; behaviour is exercised without any adapter.
   - Ruby 3.3.5, frozen_string_literal on every file, RuboCop clean.
+  Wave 1 (Foundations) does NOT change lib/. The only Wave 1 changes here are
+  adopt-live-docs (RSpec metadata tags, traceability v1 formatter, docs-refresh
+  dispatch) and add-dependency-scanning (bundle-audit, Dependabot, a spec that
+  the gemspec declares zero runtime dependencies).
 
-# Per-artifact rules (optional)
-# rules:
-#   proposal:
-#     - Keep proposals scoped to domain/ports; anything I/O-shaped belongs in a consuming app.
+rules:
+  proposal:
+    - Include "Non-goals" and "Consumers affected" sections.
+    - If the change touches lib/, say so in the first line, state the semver bump
+      (patch/minor/major) and why, and list the consumer-matrix runs needed
+      (greeter-cli, greeter-http, greeter-acceptance). In Wave 1, stop instead.
+    - Anything I/O-shaped belongs in a consuming app; say which one and stop.
+  specs:
+    - Use WHEN/THEN scenarios that a single RSpec example can assert with no adapter.
+    - Name validation lives only here. Never copy a rule from an app's spec.
+  design:
+    - Show the public API before and after for any change to Greeter::Core constants,
+      classes or method signatures.
+  tasks:
+    - First task group is always "Red tests" and lists every spec file to write.
+    - Keep each task under two hours.
+    - Last task group is "Verify and docs" (rspec, rubocop, openspec validate,
+      CHANGELOG entry if lib/ changed).
 
-# Per-operation guidance (optional)
-# operations:
-#   archive:
-#     guidance:
-#       - Summarize the archive outcome before finishing
+operations:
+  apply:
+    guidance:
+      - Never edit spec/ during apply; if a spec looks wrong, stop and say why.
+      - Run the benchmarks in spec/benchmarks only if lib/ changed.
+  archive:
+    guidance:
+      - Confirm openspec validate --all --strict passes after archiving.
