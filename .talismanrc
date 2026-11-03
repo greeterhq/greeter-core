@@ -47,6 +47,20 @@ fileignoreconfig:
   checksum: aa7ce6008d91f8eaa49bcdc8f12726c6576b7f7d98d2bce79a8b35eaf2ffc312
 - filename: .kiro/prompts/opsx-bulk-archive.prompt.md
   checksum: f3ce90a87aa724e89e064c9c25ea60217cc8cfbaf82f8b9aa21b6fca25173aaa
+- filename: .rubocop.yml
+  checksum: 04ad1f4921bf2f07bcaa1717df0ea16cceaeabeb5ae846211dcd6ea6e6eea979
 - filename: README.md
   checksum: 3d692725e20da022ceb97d80626c9a11693e14a3d02c759f20ed12fe2aefeeb3
+- filename: openspec/changes/archive/2026-11-03-add-guest-name-equality-contract/specs/greeting-core/spec.md
+  checksum: 49dabd0a10e6677d37033d41d929f2c44ea9f1606c8ad1f032fcd14be9d580a8
+- filename: openspec/changes/archive/2026-11-03-add-guest-name-equality-contract/proposal.md
+  checksum: 584f010fa80c0786669839a1426ba46d6013bd29dc4e1ac279fc882b77b0bfa7
+- filename: openspec/changes/archive/2026-11-03-add-guest-name-equality-contract/tasks.md
+  checksum: 439019cdb4cb452174f35dee3ac5d4406223241a2c2a4f2f933e6d65ed14679a
+- filename: openspec/specs/greeting-core/spec.md
+  checksum: 86b97b50b8a44b63454977e36af684e521f036d9f2895be2951be4d413050cca
+- filename: openspec/changes/archive/2026-11-03-add-guest-name-equality-contract/design.md
+  checksum: 8ffc5c2b397050fc7ef010af5533d2e2c84e5807d10acbf91b3ee7960f8b7dc1
+- filename: spec/domain/guest_name_spec.rb
+  checksum: cfa5e54c929d15ee68dbbb912ce859f717ba431d4b63f83787ba1c45a9b358b0
 version: ""

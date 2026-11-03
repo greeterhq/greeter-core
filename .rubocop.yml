@@ -37,13 +37,20 @@ RSpec/DescribeClass:
   Exclude:
     - "spec/benchmarks/**/*"
 
+# guest_name_spec consolidates the GuestName value-object equality contract
+# (==, eql?, hash, Hash-key lookup, Array#uniq) into one aggregate_failures
+# example, mapping 1:1 to its single OpenSpec scenario. That contract is one
+# cohesive behaviour, so it is asserted as one example rather than five, which
+# needs more than the default 5 lines and more than one expectation.
 RSpec/ExampleLength:
   Exclude:
     - "spec/benchmarks/**/*"
+    - "spec/domain/guest_name_spec.rb"
 
 RSpec/MultipleExpectations:
   Exclude:
     - "spec/benchmarks/**/*"
+    - "spec/domain/guest_name_spec.rb"
 
 # fake_clock_spec deliberately asserts repeated calls return the same value.
 RSpec/IdenticalEqualityAssertion:

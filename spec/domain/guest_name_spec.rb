@@ -39,6 +39,7 @@ RSpec.describe Greeter::Core::Domain::GuestName do
   end
 
   # ---------------------------------------------------------------------------
+  # Scenario: Equal names agree across ==, eql?, hash, and uniq
   # Value-object equality contract: == must be consistent with eql? and hash so
   # instances behave correctly as Hash keys and in Sets.
   # ---------------------------------------------------------------------------
@@ -46,24 +47,14 @@ RSpec.describe Greeter::Core::Domain::GuestName do
     let(:lower) { described_class.new('alice') }
     let(:upper) { described_class.new('Alice') }
 
-    it 'treats names that normalise equally as ==' do
-      expect(lower).to eq(upper)
-    end
-
-    it 'treats equal names as eql?' do
-      expect(lower).to eql(upper)
-    end
-
-    it 'gives equal names the same hash' do
-      expect(lower.hash).to eq(upper.hash)
-    end
-
-    it 'finds an equal name as a Hash key' do
-      expect({ lower => 1 }[upper]).to eq(1)
-    end
-
-    it 'de-duplicates equal names in an Array#uniq' do
-      expect([lower, upper].uniq.size).to eq(1)
+    it 'agrees across ==, eql?, hash, Hash-key lookup, and uniq' do
+      aggregate_failures 'equality contract' do
+        expect(lower).to eq(upper)                # ==
+        expect(lower).to eql(upper)               # eql?
+        expect(lower.hash).to eq(upper.hash)      # hash
+        expect({ lower => 1 }[upper]).to eq(1)    # Hash key
+        expect([lower, upper].uniq.size).to eq(1) # Array#uniq
+      end
     end
   end
 
