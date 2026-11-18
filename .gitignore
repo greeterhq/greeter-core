@@ -5,7 +5,7 @@ Gemfile.lock
 *.gem
 
 # Ruby version managers
-/.ruby-version
+# .ruby-version is intentionally tracked so the Ruby pin (3.3.x) is shared.
 
 # RSpec
 /spec/examples.txt
