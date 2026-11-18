@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+require 'open3'
+require 'shellwords'
+require 'tmpdir'
 require 'yaml'
 
 # Structural checks on .github/workflows/ci.yml for the live-docs pipeline.
@@ -9,7 +12,7 @@ RSpec.describe 'CI workflow' do
 
   def job(name)
     expect(workflow.fetch('jobs')).to include(name)
-    workflow['jobs'][name]
+    workflow['jobs'].fetch(name, {})
   end
 
   def steps(name)
@@ -55,6 +58,32 @@ RSpec.describe 'CI workflow' do
       expect(steps('performance').map { |step| step['run'].to_s }.join).to include('spec/benchmarks')
       expect(upload('performance', 'repo-trace-performance')&.fetch('with'))
         .to include('path' => 'tmp/repo-trace-performance.json', 'retention-days' => 1)
+    end
+  end
+
+  # Runs the performance job's own rspec command from ci.yml with --dry-run, so
+  # a command that selects no files (as `rspec spec/benchmarks/` does with the
+  # default *_spec.rb pattern) fails here instead of passing silently in CI.
+  # Leading VAR=value words are dropped; REPO_TRACE_PATH points at a temp file.
+  describe 'performance command' do
+    def performance_command
+      line = steps('performance').flat_map { |step| step['run'].to_s.lines }
+                                 .find { |text| text.include?('rspec') }
+      Shellwords.split(line.to_s).drop_while { |word| word.match?(/\A[A-Z_]+=/) }
+    end
+
+    it 'selects at least one benchmark example',
+       :aggregate_failures,
+       requirement: 'ci-publishes-the-trace-on-main-and-weekly',
+       scenario: 'functional-and-performance-upload-their-own-traces' do
+      command = performance_command
+      expect(command).to include('rspec')
+      output = Dir.mktmpdir('ci-dry-run') do |dir|
+        Open3.capture2e({ 'REPO_TRACE_PATH' => File.join(dir, 'trace.json') }, *command, '--dry-run',
+                        chdir: File.expand_path('..', __dir__)).first
+      end
+      expect(output).not_to include('No examples found')
+      expect(output).to match(/^[1-9]\d* examples?, /)
     end
   end
 

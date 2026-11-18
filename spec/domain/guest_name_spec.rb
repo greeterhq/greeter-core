@@ -13,11 +13,25 @@ RSpec.describe Greeter::Core::Domain::GuestName do
     end
   end
 
-  it_behaves_like 'an invalid guest name', ''
-  it_behaves_like 'an invalid guest name', '   '
-  it_behaves_like 'an invalid guest name', 'a' * 65
-  it_behaves_like 'an invalid guest name', "\e[31m"
-  it_behaves_like 'an invalid guest name', "Alice\n"
+  context 'rejects an empty or whitespace-only name',
+          requirement: 'rejects-an-empty-or-whitespace-only-name',
+          scenario: 'rejects-an-empty-or-whitespace-only-name' do
+    it_behaves_like 'an invalid guest name', ''
+    it_behaves_like 'an invalid guest name', '   '
+  end
+
+  context 'rejects a name longer than 64 characters',
+          requirement: 'rejects-a-name-longer-than-64-characters',
+          scenario: 'rejects-a-name-longer-than-64-characters' do
+    it_behaves_like 'an invalid guest name', 'a' * 65
+  end
+
+  context 'rejects names containing control or escape characters',
+          requirement: 'rejects-names-containing-control-or-escape-characters',
+          scenario: 'rejects-a-name-containing-a-control-or-escape-character' do
+    it_behaves_like 'an invalid guest name', "\e[31m"
+    it_behaves_like 'an invalid guest name', "Alice\n"
+  end
 
   # ---------------------------------------------------------------------------
   # Scenario: Greets a named guest — value is preserved after construction

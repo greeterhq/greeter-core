@@ -1,12 +1,12 @@
 ## ADDED Requirements
 
 ### Requirement: Every requirement has a tagged example
-Every `### Requirement:` heading in `openspec/specs/**/spec.md` SHALL be covered
-by at least one RSpec example tagged `requirement: '<slug>'`. The slug is the
-heading text lowercased, with each run of characters other than a-z and 0-9
-replaced by one `-` and leading and trailing `-` trimmed. Scenario slugs are
-derived the same way from `#### Scenario:` headings. When a requirement has no
-tagged example, the suite SHALL fail naming the requirement and its spec file.
+Every known `### Requirement:` heading SHALL be covered by at least one RSpec
+example tagged `requirement: '<slug>'`. A slug is the heading text lowercased,
+each run of characters other than a-z and 0-9 replaced by one `-`, and `-`
+trimmed from both ends; scenario slugs come the same way from `#### Scenario:`
+headings. When a requirement has no tagged example, the suite SHALL fail naming
+the requirement and its spec file.
 
 #### Scenario: Slug rule turns headings into slugs
 - **WHEN** the slug function is given the headings in the slug table (for example `Greets a named guest`, `Base Clock#now raises NotImplementedError`, `Equal names agree across ==, eql?, hash, and uniq`, `"  --Leading and trailing!!  "`, and this repo's real requirement and scenario headings)
@@ -19,12 +19,12 @@ tagged example, the suite SHALL fail naming the requirement and its spec file.
 - Maps to: `spec/trace_check_spec.rb`
 
 ### Requirement: Tagged examples must match a requirement and scenario
-An RSpec example whose `requirement:` slug matches no requirement heading in
-`openspec/specs/**/spec.md` SHALL cause the suite to fail naming the unknown
-slug and the example's file. Requirement slugs are matched across the whole
-repo. An example whose `scenario:` slug is not a scenario of its tagged
-requirement SHALL also fail, naming the scenario, requirement and file. A
-scenario whose slug equals its requirement's slug is valid.
+An RSpec example whose `requirement:` slug matches no known requirement SHALL
+cause the suite to fail naming the slug and the example's file. Known headings
+come from `openspec/specs/**/spec.md` and from the ADDED and MODIFIED sections
+of changes that are not archived. An example whose `scenario:` slug is not a
+scenario of its requirement SHALL also fail. A scenario slug may equal its
+requirement's slug.
 
 #### Scenario: Unknown requirement slug fails and is named
 - **WHEN** the trace-check runs with an example tagged with the requirement slug `no-such-requirement`
@@ -34,6 +34,11 @@ scenario whose slug equals its requirement's slug is valid.
 #### Scenario: Scenario slug is matched only within its requirement
 - **WHEN** the trace-check runs with an example whose scenario slug exists only under a different requirement, and another whose scenario slug equals its own requirement's slug
 - **THEN** it fails naming the first example's scenario, requirement and file, and reports no problem for the second
+- Maps to: `spec/trace_check_spec.rb`
+
+#### Scenario: Requirements in in-flight changes are known
+- **WHEN** the trace-check also reads change deltas and an example is tagged with a requirement or scenario found only in an ADDED or MODIFIED section of a change that is not archived, or found only in an archived change, or only in a REMOVED or RENAMED section
+- **THEN** the first is known and reports no problem, and the others are reported as unknown with the example's file and line
 - Maps to: `spec/trace_check_spec.rb`
 
 ### Requirement: Repo trace contains only slugs, statuses, locations and run metadata
@@ -102,7 +107,7 @@ SHALL run only on `v*` tag pushes.
 
 #### Scenario: Functional and performance upload their own traces
 - **WHEN** `.github/workflows/ci.yml` is parsed
-- **THEN** `functional` runs the formatter and uploads `repo-trace-functional` with `retention-days: 1`, and `performance` runs the formatter writing `tmp/repo-trace-performance.json` and uploads `repo-trace-performance` with `retention-days: 1`
+- **THEN** `functional` runs the formatter and uploads `repo-trace-functional` with `retention-days: 1`, `performance` runs the formatter writing `tmp/repo-trace-performance.json` and uploads `repo-trace-performance` with `retention-days: 1`, and the performance job's rspec command, run with `--dry-run`, selects at least one example
 - Maps to: `spec/ci_workflow_spec.rb`
 
 #### Scenario: Trace job merges and uploads on main and schedule

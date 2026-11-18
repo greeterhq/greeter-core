@@ -29,38 +29,18 @@ RSpec/SpecFilePathFormat:
 
 # Benchmark "specs" are executable performance checks, not *_spec.rb files,
 # and describe a behaviour (latency) rather than a single class.
+# adopt-live-docs: spec/fixtures/** files must NOT end in _spec.rb, so the main
+# suite never loads them (formatter, trace-check and tag-only fixtures).
 RSpec/SpecFilePathSuffix:
   Exclude:
     - "spec/benchmarks/**/*"
-
-# guest_name_spec consolidates the GuestName value-object equality contract
-# (==, eql?, hash, Hash-key lookup, Array#uniq) into one aggregate_failures
-# example, mapping 1:1 to its single OpenSpec scenario. That contract is one
-# cohesive behaviour, so it is asserted as one example rather than five, which
-# needs more than the default 5 lines and more than one expectation.
-RSpec/MultipleExpectations:
-  Exclude:
-    - "spec/benchmarks/**/*"
-    - "spec/domain/guest_name_spec.rb"
-
-# fake_clock_spec deliberately asserts repeated calls return the same value.
-RSpec/IdenticalEqualityAssertion:
-  Exclude:
-    - "spec/testing/fake_clock_spec.rb"
-
-# adopt-live-docs: spec/fixtures/repo_trace holds deliberately trivial example
-# files that the formatter spec runs in a subprocess (passing, failing, skipped
-# and pending on purpose). They are inputs, not tests, so RSpec style cops do
-# not apply to them.
-RSpec:
-  Exclude:
     - "spec/fixtures/**/*"
 
-# adopt-live-docs: these specs check tooling (slug rule, trace-check, repo-trace
-# formatter, merge script, CI workflow), not a Greeter::Core class. Each
-# scenario's checks are one aggregate_failures example so it maps to its
-# OpenSpec scenario, which needs more than five lines and more than five
-# memoized helpers for the subprocess and fixture paths.
+# Benchmarks describe a behaviour (latency), not a class.
+# adopt-live-docs: the tooling specs (slug rule, trace-check, tag-only diff,
+# repo-trace formatter, merge script, CI workflow) check spec-side tooling, not
+# a Greeter::Core class; their subjects (RepoTrace::*) are not loaded until
+# implemented, and the formatter fixtures describe a fixture run.
 RSpec/DescribeClass:
   Exclude:
     - "spec/benchmarks/**/*"
@@ -68,7 +48,15 @@ RSpec/DescribeClass:
     - "spec/trace_check_spec.rb"
     - "spec/bin/*_spec.rb"
     - "spec/ci_workflow_spec.rb"
+    - "spec/fixtures/repo_trace/*.rb"
 
+# guest_name_spec consolidates the GuestName value-object equality contract
+# (==, eql?, hash, Hash-key lookup, Array#uniq) into one aggregate_failures
+# example, mapping 1:1 to its single OpenSpec scenario. That contract is one
+# cohesive behaviour, so it is asserted as one example rather than five, which
+# needs more than the default 5 lines and more than one expectation.
+# adopt-live-docs: each tooling spec example checks one OpenSpec scenario as a
+# single aggregate_failures example, which needs more than five lines.
 RSpec/ExampleLength:
   Exclude:
     - "spec/benchmarks/**/*"
@@ -77,7 +65,36 @@ RSpec/ExampleLength:
     - "spec/bin/*_spec.rb"
     - "spec/ci_workflow_spec.rb"
 
+RSpec/MultipleExpectations:
+  Exclude:
+    - "spec/benchmarks/**/*"
+    - "spec/domain/guest_name_spec.rb"
+
+# adopt-live-docs: the formatter and merge specs need more than five lets for
+# the temp dir, output and input paths, sha and fixture traces.
 RSpec/MultipleMemoizedHelpers:
   Exclude:
     - "spec/support/*_spec.rb"
     - "spec/bin/*_spec.rb"
+
+# fake_clock_spec deliberately asserts repeated calls return the same value.
+# adopt-live-docs: the formatter fixtures use trivial expect(1).to eq(1)
+# examples on purpose; only their pass/fail/skip/pending status matters.
+RSpec/IdenticalEqualityAssertion:
+  Exclude:
+    - "spec/testing/fake_clock_spec.rb"
+    - "spec/fixtures/repo_trace/*.rb"
+
+# adopt-live-docs: same reason as above; the fixtures assert on literals.
+RSpec/ExpectActual:
+  Exclude:
+    - "spec/fixtures/repo_trace/*.rb"
+
+# adopt-live-docs: guest_name_spec wraps its it_behaves_like lines in contexts
+# named after the OpenSpec requirement they verify (the context carries the
+# requirement:/scenario: tags, which it_behaves_like cannot). The tag-only
+# fixtures copy that shape. Requirement names do not start with when/with.
+RSpec/ContextWording:
+  Exclude:
+    - "spec/domain/guest_name_spec.rb"
+    - "spec/fixtures/tag_only/**/*"

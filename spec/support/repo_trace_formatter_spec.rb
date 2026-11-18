@@ -95,6 +95,16 @@ RSpec.describe 'RepoTraceFormatter' do
     expect(results).to contain_exactly(a_hash_including('status' => 'failed'))
   end
 
+  it 'gives a shared example the tags of the context that wraps it',
+     requirement: 'repo-trace-contains-only-slugs-statuses-locations-and-run-metadata',
+     scenario: 'formatter-writes-the-v1-document' do
+    results = trace_for('wrapped_shared_example.rb')['results']
+    expect(results).to contain_exactly(
+      a_hash_including('requirement' => 'demo-requirement', 'scenario' => 'demo-wrapped-first', 'status' => 'passed'),
+      a_hash_including('requirement' => 'demo-requirement', 'scenario' => 'demo-wrapped-second', 'status' => 'passed')
+    )
+  end
+
   it 'refuses a requirement tag that is not a slug and writes no file',
      :aggregate_failures,
      requirement: 'repo-trace-contains-only-slugs-statuses-locations-and-run-metadata',

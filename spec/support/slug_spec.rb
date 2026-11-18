@@ -49,6 +49,7 @@ RSpec.describe 'RepoTrace::Slug' do
       'Tagged examples must match a requirement and scenario' =>
         'tagged-examples-must-match-a-requirement-and-scenario',
       'Unknown requirement slug fails and is named' => 'unknown-requirement-slug-fails-and-is-named',
+      'Requirements in in-flight changes are known' => 'requirements-in-in-flight-changes-are-known',
       'Scenario slug is matched only within its requirement' =>
         'scenario-slug-is-matched-only-within-its-requirement',
       'Repo trace contains only slugs, statuses, locations and run metadata' =>
