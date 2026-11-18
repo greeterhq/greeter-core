@@ -1,7 +1,11 @@
 # frozen_string_literal: true
 
 source 'https://rubygems.org'
-ruby '3.3.5'
+
+# No `ruby` version directive here: CI runs the latest Ruby 3.3.x
+# (env.RUBY_VERSION "3.3"), so an exact pin fails bundler's version check
+# whenever the runner's patch moves. The 3.3 family is pinned by CI and by the
+# tracked .ruby-version (local development), and the gemspec requires >= 3.3.0.
 
 gemspec
 

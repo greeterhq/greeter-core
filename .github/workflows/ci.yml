@@ -13,7 +13,11 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  RUBY_VERSION: "3.3.5"
+  # "3.3" tracks the latest 3.3.x: newer runner images (ubuntu-26.04, which
+  # ubuntu-latest now resolves to) only build the latest patch of each series,
+  # so an exact pin like 3.3.5 fails with a 404. .ruby-version pins 3.3.13 for
+  # local development only. Same approach as greeter-http.
+  RUBY_VERSION: "3.3"
   BUNDLER_VERSION: "2.5.23"
 
 jobs:

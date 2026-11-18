@@ -19,7 +19,8 @@ context: |
   - Traceability: every OpenSpec scenario maps to exactly one RSpec example,
     tagged with metadata requirement: '<requirement-slug>', scenario: '<scenario-slug>'.
     This gem has no Cucumber; behaviour is exercised without any adapter.
-  - Ruby 3.3.5, frozen_string_literal on every file, RuboCop clean.
+  - Ruby 3.3.x (CI latest 3.3, .ruby-version 3.3.13), frozen_string_literal
+    on every file, RuboCop clean.
   Wave 1 (Foundations) does NOT change lib/. The only Wave 1 changes here are
   adopt-live-docs (RSpec metadata tags, traceability v1 formatter, docs-refresh
   dispatch) and add-dependency-scanning (bundle-audit, Dependabot, a spec that

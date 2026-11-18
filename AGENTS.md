@@ -47,6 +47,7 @@ not duplicated here — this gem owns the rule; the app references it.
 
 ## Toolchain
 
-- Ruby 3.3.5
+- Ruby 3.3.x: CI uses the latest 3.3 patch; `.ruby-version` pins 3.3.13 for
+  local development. No exact `ruby` directive in the Gemfile.
 - `# frozen_string_literal: true` on every file
 - RuboCop clean (no offenses)
