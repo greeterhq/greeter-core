@@ -1,4 +1,6 @@
 fileignoreconfig:
+- filename: .github/workflows/ci.yml
+  checksum: 24b54032503cb1ce2638bd3bea611dd3a4dac0a5be96e313d13498123e063d88
 - filename: .kiro/skills/openspec-continue-change/SKILL.md
   checksum: 4f30cd4f72d805a5243416be5b39b0928c25687e76d00ee269cce794cca81080
 - filename: .kiro/prompts/opsx-new.prompt.md
@@ -51,10 +53,12 @@ fileignoreconfig:
   checksum: e6e1ebb47bdd201b0dbcee144cd1321c86947c80dc5c7fff610c12138aa0f72e
 - filename: README.md
   checksum: 3d692725e20da022ceb97d80626c9a11693e14a3d02c759f20ed12fe2aefeeb3
+- filename: bin/merge-repo-trace
+  checksum: 955df41b1be421ff733cf4ce374d6e28d3a3245434d5cd1feb124ef8f0bc482a
 - filename: openspec/changes/adopt-live-docs/proposal.md
   checksum: 6430f53d557ad1fadeef4312c4585a6225cd0b34e6ba6a7e042c3d17398186eb
 - filename: openspec/changes/adopt-live-docs/tasks.md
-  checksum: 3a0ece8eb782b95ae95ab7704175fc24774146aa7e305f0ed7a8a703bce38caf
+  checksum: 27d538ccb180a4444236542a178a11d8b4faf45884c1f3c9a2214b0aeffe5b43
 - filename: openspec/changes/adopt-live-docs/specs/live-docs-traceability/spec.md
   checksum: 718475f67ed982f65b862a060e8ed859e81a209a72e65f5470f5de038b184083
 - filename: openspec/changes/adopt-live-docs/design.md
@@ -77,6 +81,8 @@ fileignoreconfig:
   checksum: 59c3ccbf8d037f6198f2010feb79060906cfab076019e788bb66795603a3cd1f
 - filename: spec/fixtures/repo_trace/statuses_example.rb
   checksum: 9e7f098db63509929fa3061ae170e63da0edc5998ad8553686cfafff9c250b4c
+- filename: spec/support/repo_trace_formatter.rb
+  checksum: 9bc0833041f1043998e7f6dd082ebfae30f2f3ff5f0da6fcbcc010536878ca66
 - filename: spec/support/repo_trace_formatter_spec.rb
   checksum: b0be4fb67b659d6cf095560cfab1f13c99842468b825423a36f25c1474fb26fc
 version: ""

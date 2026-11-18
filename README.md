@@ -95,6 +95,35 @@ bundle exec ruby -Ilib -e "require 'greeter/core'; puts Greeter::Core::Domain::G
 gem build greeter-core.gemspec
 ```
 
+### latency benchmark
+`bundle exec rspec spec/benchmarks --pattern 'spec/benchmarks/**/*_bench.rb'`
+
+
+## Live docs: requirement traceability
+
+greeter-docs shows which OpenSpec requirements this gem has and whether the
+tests that verify them passed.
+
+- Every RSpec example that verifies a requirement is tagged
+  `requirement: '<slug>', scenario: '<slug>'`. The slug is the heading text
+  after `### Requirement:` or `#### Scenario:`, lowercased, with each run of
+  characters other than a-z and 0-9 replaced by `-`, and `-` trimmed.
+- `spec/trace_check_spec.rb` fails when a requirement has no tagged example or
+  a tag matches no requirement. Requirements added or modified by an in-flight
+  change under `openspec/changes/` count too.
+- `RepoTraceFormatter` (`spec/support/repo_trace_formatter.rb`) writes a
+  `greeterhq.repo-trace.v1` file with slugs, statuses, locations and run
+  metadata only, never example descriptions:
+  ```bash
+  REPO_TRACE_PATH=tmp/repo-trace.json bundle exec rspec --format RepoTraceFormatter
+  ```
+- In CI, `functional` and `performance` each write a partial trace. On push to
+  `main` and every Monday at 06:17 UTC, the `trace` job merges them with
+  `bin/merge-repo-trace` and uploads the `repo-trace` artifact (kept 90 days),
+  then `notify-docs` sends `docs-refresh` to greeter-docs. This needs the
+  `DISPATCH_APP_CLIENT_ID` variable, the `DISPATCH_APP_PRIVATE_KEY` secret, and
+  the `greeterhq-dispatch` app installed on greeter-docs.
+
 
 ## Publishing to RubyGems.org
 

@@ -6,6 +6,15 @@ name: CI
     tags: ["v*"]
   pull_request:
     branches: ["**"]
+  # Weekly run on main so greeter-docs gets a fresh trace even when nothing is
+  # pushed. It runs the tests and publishes the trace; it never publishes the gem.
+  schedule:
+    - cron: "17 6 * * 1"
+
+# Least privilege by default (adopt-live-docs S1). Jobs that need more
+# (publish) or less (notify-docs) declare their own permissions.
+permissions:
+  contents: read
 
 # Cancel in-flight runs for the same ref so a fast-follow push doesn't queue.
 concurrency:
@@ -36,6 +45,8 @@ jobs:
             --config .rubocop.yml \
             --format github
 
+  # Runs the default *_spec.rb suite with the repo-trace formatter, and keeps
+  # its partial trace for one day so the trace job can merge it.
   functional:
     name: Functional Test
     runs-on: ubuntu-latest
@@ -48,12 +59,24 @@ jobs:
           ruby-version: ${{ env.RUBY_VERSION }}
           bundler: ${{ env.BUNDLER_VERSION }}
           bundler-cache: true
-      - run: bundle exec rspec --format progress
+
+      - name: Run RSpec with the repo-trace formatter
+        env:
+          REPO_TRACE_PATH: tmp/repo-trace-functional.json
+        run: bundle exec rspec --format progress --format RepoTraceFormatter
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: repo-trace-functional
+          path: tmp/repo-trace-functional.json
+          retention-days: 1
+          if-no-files-found: error
 
   # Domain latency guarantee (greeting-core capability). The benchmark lives at
-  # spec/benchmarks/*_bench.rb, so it is not matched by the default *_spec.rb
-  # run in the Functional Test job and must be invoked by explicit path. Runs in
-  # parallel with Functional Test once linting is green.
+  # spec/benchmarks/*_bench.rb, which the default *_spec.rb pattern does not
+  # match, so the run passes --pattern explicitly (a bare `rspec spec/benchmarks/`
+  # finds no examples and passes). Runs in parallel with Functional Test once
+  # linting is green, and keeps its partial trace for one day.
   performance:
     name: Performance Test
     runs-on: ubuntu-latest
@@ -67,18 +90,99 @@ jobs:
           bundler-cache: true
 
       - name: Run latency benchmark (fails on budget breach)
-        run: bundle exec rspec spec/benchmarks/ --format progress
+        env:
+          REPO_TRACE_PATH: tmp/repo-trace-performance.json
+        run: bundle exec rspec spec/benchmarks --pattern 'spec/benchmarks/**/*_bench.rb' --format progress --format RepoTraceFormatter
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: repo-trace-performance
+          path: tmp/repo-trace-performance.json
+          retention-days: 1
+          if-no-files-found: error
+
+  # Merges the two partial traces into the repo-trace artifact that
+  # greeter-docs reads. Push to main and the weekly schedule only; needs both
+  # test jobs green, so a red run publishes nothing.
+  trace:
+    name: Publish repo trace
+    runs-on: ubuntu-latest
+    needs: [functional, performance]
+    if: github.event_name == 'schedule' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+
+      # Stdlib only, so no bundle install.
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ env.RUBY_VERSION }}
+
+      # Same-run artifacts by name, each in its own directory.
+      - uses: actions/download-artifact@v4
+        with:
+          name: repo-trace-functional
+          path: tmp/functional
+      - uses: actions/download-artifact@v4
+        with:
+          name: repo-trace-performance
+          path: tmp/performance
+
+      - name: Merge traces
+        run: >-
+          bin/merge-repo-trace tmp/repo-trace.json
+          tmp/functional/repo-trace-functional.json
+          tmp/performance/repo-trace-performance.json
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: repo-trace
+          path: tmp/repo-trace.json
+          retention-days: 90
+          if-no-files-found: error
+
+  # Tells greeter-docs a new trace is available. Uses a short-lived GitHub App
+  # token scoped to greeter-docs contents (adopt-live-docs S2); the job's own
+  # GITHUB_TOKEN gets no permissions. No fallback when the app credentials are
+  # missing: the job fails, which is the intended signal.
+  notify-docs:
+    name: Notify greeter-docs
+    runs-on: ubuntu-latest
+    needs: trace
+    if: github.event_name == 'schedule' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
+    permissions: {}
+    steps:
+      - name: Mint dispatch token
+        id: app-token
+        uses: actions/create-github-app-token@v3
+        with:
+          client-id: ${{ vars.DISPATCH_APP_CLIENT_ID }}
+          private-key: ${{ secrets.DISPATCH_APP_PRIVATE_KEY }}
+          owner: greeterhq
+          repositories: greeter-docs
+          permission-contents: write
+
+      - name: Send docs-refresh
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: >-
+          gh api repos/greeterhq/greeter-docs/dispatches
+          -f event_type=docs-refresh
+          -f 'client_payload[repo]=greeter-core'
 
   # Publish the gem to rubygems.org. Runs only on version tag pushes (e.g.
-  # `v0.1.0`) and only after linting and both test jobs are green. Uses
-  # RubyGems trusted publishing (OIDC) — no API key is stored in GitHub; a
-  # short-lived credential is minted at run time. See README "Publishing to
-  # RubyGems.org" for the one-time setup.
+  # `v0.1.0`), never on the schedule or pull requests, and only after linting
+  # and both test jobs are green. Uses RubyGems trusted publishing (OIDC) — no
+  # API key is stored in GitHub; a short-lived credential is minted at run
+  # time. See README "Publishing to RubyGems.org" for the one-time setup.
   publish:
     name: Publish to RubyGems.org
     runs-on: ubuntu-latest
     needs: [functional, performance]
-    if: startsWith(github.ref, 'refs/tags/v')
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
 
     # Required for RubyGems trusted publishing to request the OIDC token.
     permissions:
