@@ -51,6 +51,14 @@ fileignoreconfig:
   checksum: 04ad1f4921bf2f07bcaa1717df0ea16cceaeabeb5ae846211dcd6ea6e6eea979
 - filename: README.md
   checksum: 3d692725e20da022ceb97d80626c9a11693e14a3d02c759f20ed12fe2aefeeb3
+- filename: openspec/changes/adopt-live-docs/proposal.md
+  checksum: 6430f53d557ad1fadeef4312c4585a6225cd0b34e6ba6a7e042c3d17398186eb
+- filename: openspec/changes/adopt-live-docs/tasks.md
+  checksum: b4706dbef8b7dd892440665d10a841b382d870ab410751664ded5951c0dadd65
+- filename: openspec/changes/adopt-live-docs/specs/live-docs-traceability/spec.md
+  checksum: 718475f67ed982f65b862a060e8ed859e81a209a72e65f5470f5de038b184083
+- filename: openspec/changes/adopt-live-docs/design.md
+  checksum: 83da0cd19c57a4ebcb8befdd6dc6aab9f52bcf981e42973586db4eb88ac952a7
 - filename: openspec/changes/archive/2026-11-03-add-guest-name-equality-contract/specs/greeting-core/spec.md
   checksum: 49dabd0a10e6677d37033d41d929f2c44ea9f1606c8ad1f032fcd14be9d580a8
 - filename: openspec/changes/archive/2026-11-03-add-guest-name-equality-contract/proposal.md
