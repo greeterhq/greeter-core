@@ -13,11 +13,25 @@ RSpec.describe Greeter::Core::Domain::GuestName do
     end
   end
 
-  it_behaves_like 'an invalid guest name', ''
-  it_behaves_like 'an invalid guest name', '   '
-  it_behaves_like 'an invalid guest name', 'a' * 65
-  it_behaves_like 'an invalid guest name', "\e[31m"
-  it_behaves_like 'an invalid guest name', "Alice\n"
+  context 'rejects an empty or whitespace-only name',
+          requirement: 'rejects-an-empty-or-whitespace-only-name',
+          scenario: 'rejects-an-empty-or-whitespace-only-name' do
+    it_behaves_like 'an invalid guest name', ''
+    it_behaves_like 'an invalid guest name', '   '
+  end
+
+  context 'rejects a name longer than 64 characters',
+          requirement: 'rejects-a-name-longer-than-64-characters',
+          scenario: 'rejects-a-name-longer-than-64-characters' do
+    it_behaves_like 'an invalid guest name', 'a' * 65
+  end
+
+  context 'rejects names containing control or escape characters',
+          requirement: 'rejects-names-containing-control-or-escape-characters',
+          scenario: 'rejects-a-name-containing-a-control-or-escape-character' do
+    it_behaves_like 'an invalid guest name', "\e[31m"
+    it_behaves_like 'an invalid guest name', "Alice\n"
+  end
 
   # ---------------------------------------------------------------------------
   # Scenario: Greets a named guest — value is preserved after construction
@@ -28,7 +42,9 @@ RSpec.describe Greeter::Core::Domain::GuestName do
     end
 
     # Scenario: Normalises casing and whitespace
-    it 'strips surrounding whitespace and title-cases the name' do
+    it 'strips surrounding whitespace and title-cases the name',
+       requirement: 'validates-and-normalises-a-guest-name',
+       scenario: 'normalises-whitespace-and-casing' do
       expect(described_class.new('  alice smith  ').display).to eq('Alice Smith')
     end
 
@@ -47,7 +63,9 @@ RSpec.describe Greeter::Core::Domain::GuestName do
     let(:lower) { described_class.new('alice') }
     let(:upper) { described_class.new('Alice') }
 
-    it 'agrees across ==, eql?, hash, Hash-key lookup, and uniq' do
+    it 'agrees across ==, eql?, hash, Hash-key lookup, and uniq',
+       requirement: 'guestname-is-a-value-object-with-a-consistent-equality-contract',
+       scenario: 'equal-names-agree-across-eql-hash-and-uniq' do
       aggregate_failures 'equality contract' do
         expect(lower).to eq(upper)                # ==
         expect(lower).to eql(upper)               # eql?
@@ -63,12 +81,16 @@ RSpec.describe Greeter::Core::Domain::GuestName do
   # — additional control-character boundary cases
   # ---------------------------------------------------------------------------
   describe 'control-character rejection' do
-    it 'rejects a name containing a null byte' do
+    it 'rejects a name containing a null byte',
+       requirement: 'rejects-names-containing-control-or-escape-characters',
+       scenario: 'rejects-a-name-containing-a-control-or-escape-character' do
       expect { described_class.new("Ali\x00ce") }
         .to raise_error(Greeter::Core::Domain::InvalidGuestName)
     end
 
-    it 'rejects a name containing DEL (0x7F)' do
+    it 'rejects a name containing DEL (0x7F)',
+       requirement: 'rejects-names-containing-control-or-escape-characters',
+       scenario: 'rejects-a-name-containing-a-control-or-escape-character' do
       expect { described_class.new("Ali\x7Fce") }
         .to raise_error(Greeter::Core::Domain::InvalidGuestName)
     end

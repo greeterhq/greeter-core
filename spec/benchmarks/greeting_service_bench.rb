@@ -12,7 +12,9 @@ RSpec.describe 'GreetingService latency' do
   let(:clock)   { Greeter::Core::Testing::FixedClock.new(Time.utc(2024, 6, 1, 9, 0, 0)) }
   let(:service) { Greeter::Core::Domain::GreetingService.new(clock: clock) }
 
-  it 'completes #greet in under 5 ms at p99 over 200 iterations' do
+  it 'completes #greet in under 5 ms at p99 over 200 iterations',
+     requirement: 'greeting-construction-stays-within-latency-budget',
+     scenario: 'completes-greet-in-under-5-ms-at-p99' do
     # Warm up
     50.times { service.greet('Alice') }
 

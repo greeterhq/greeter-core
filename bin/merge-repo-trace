@@ -1,0 +1,137 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+# Usage: bin/merge-repo-trace OUT IN_A IN_B
+#
+# Merges the functional and performance repo-trace files written by
+# RepoTraceFormatter into one greeterhq.repo-trace.v1 file. Both inputs come
+# from the same workflow run, so schema, repo, sha and run_id must match. The
+# merged file keeps the later recorded_at. Inputs are untrusted: only the v1
+# keys and value shapes are accepted, and on any error nothing is written.
+# Stdlib only; not part of the packaged gem.
+
+require 'fileutils'
+require 'json'
+require 'time'
+
+module RepoTrace
+  class Merge
+    class Error < StandardError; end
+
+    SCHEMA = 'greeterhq.repo-trace.v1'
+    TOP_KEYS = %w[schema repo sha recorded_at run_id results].freeze
+    RESULT_KEYS = %w[requirement scenario status source location].freeze
+    SHARED_FIELDS = %w[schema repo sha run_id].freeze
+    STATUSES = %w[passed failed pending skipped].freeze
+    PATTERNS = {
+      'requirement' => /\A[a-z0-9]+(-[a-z0-9]+)*\z/,
+      'scenario' => /\A[a-z0-9]+(-[a-z0-9]+)*\z/,
+      'location' => %r{\Aspec/[\w./-]+\.rb:\d+\z}
+    }.freeze
+
+    def self.run(argv, err: $stderr)
+      raise Error, 'usage: bin/merge-repo-trace OUT IN_A IN_B' unless argv.size == 3
+
+      out, *inputs = argv
+      merged = new(inputs.to_h { |path| [path, read(path)] }).merged
+      FileUtils.mkdir_p(File.dirname(out))
+      File.write(out, "#{JSON.pretty_generate(merged)}\n")
+      0
+    rescue Error => e
+      err.puts("merge-repo-trace: #{e.message}")
+      1
+    end
+
+    def self.read(path)
+      JSON.parse(File.read(path))
+    rescue JSON::ParserError, SystemCallError
+      raise Error, "#{path}: not a readable JSON file"
+    end
+
+    def initialize(traces)
+      @traces = traces
+    end
+
+    def merged
+      @traces.each { |path, trace| validate_shape(path, trace) }
+      first, second = @traces.values
+      SHARED_FIELDS.each { |field| raise Error, "#{field} differs" unless first[field] == second[field] }
+      validate_run_metadata(first)
+      first.slice(*SHARED_FIELDS).merge('recorded_at' => later_recorded_at, 'results' => results)
+    end
+
+    private
+
+    def validate_shape(path, trace)
+      validate_top_keys(path, trace)
+      raise Error, "#{path}: results must be a list" unless trace['results'].is_a?(Array)
+
+      trace['results'].each_with_index { |result, index| validate_result(path, result, index + 1) }
+    end
+
+    def validate_top_keys(path, trace)
+      raise Error, "#{path}: expected a JSON object" unless trace.is_a?(Hash)
+
+      unknown = trace.keys - TOP_KEYS
+      raise Error, "#{path}: unknown key #{unknown.first}" if unknown.any?
+
+      missing = TOP_KEYS - trace.keys
+      raise Error, "#{path}: missing key #{missing.first}" if missing.any?
+    end
+
+    def validate_result(path, result, number)
+      raise Error, "#{path}: result #{number} must be an object" unless result.is_a?(Hash)
+
+      unknown = result.keys - RESULT_KEYS
+      raise Error, "#{path}: result #{number} has unknown key #{unknown.first}" if unknown.any?
+
+      invalid = RESULT_KEYS.find { |field| !valid_field?(field, result[field]) }
+      raise Error, "#{path}: result #{number} has an invalid #{invalid}" if invalid
+    end
+
+    def valid_field?(field, value)
+      return false unless value.is_a?(String)
+
+      case field
+      when 'status' then STATUSES.include?(value)
+      when 'source' then value == 'rspec'
+      else value.match?(PATTERNS.fetch(field))
+      end
+    end
+
+    def validate_run_metadata(trace)
+      raise Error, 'schema is not greeterhq.repo-trace.v1' unless trace['schema'] == SCHEMA
+      raise Error, 'repo is not greeter-core' unless trace['repo'] == 'greeter-core'
+      raise Error, 'invalid sha' unless matches?(trace['sha'], /\A[0-9a-f]{40}\z/)
+      raise Error, 'invalid run_id' unless trace['run_id'].nil? || matches?(trace['run_id'], /\A\d+\z/)
+    end
+
+    def matches?(value, pattern)
+      value.is_a?(String) && value.match?(pattern)
+    end
+
+    def later_recorded_at
+      @traces.map { |path, trace| [recorded_time(path, trace['recorded_at']), trace['recorded_at']] }
+             .max_by(&:first).last
+    end
+
+    def recorded_time(path, value)
+      Time.iso8601(value.to_s)
+    rescue ArgumentError
+      raise Error, "#{path}: invalid recorded_at"
+    end
+
+    def results
+      all = @traces.values.flat_map { |trace| trace['results'] }
+      duplicate = all.group_by { |result| result.values_at('requirement', 'scenario', 'location') }
+                     .find { |_, group| group.size > 1 }
+      if duplicate
+        requirement, _, location = duplicate.first
+        raise Error, %(duplicate result: requirement "#{requirement}" at #{location})
+      end
+      all.sort_by { |result| result.values_at('location', 'requirement', 'scenario') }
+    end
+  end
+end
+
+exit RepoTrace::Merge.run(ARGV) if $PROGRAM_NAME == __FILE__

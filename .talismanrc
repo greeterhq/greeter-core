@@ -1,4 +1,6 @@
 fileignoreconfig:
+- filename: .github/workflows/ci.yml
+  checksum: 24b54032503cb1ce2638bd3bea611dd3a4dac0a5be96e313d13498123e063d88
 - filename: .kiro/skills/openspec-continue-change/SKILL.md
   checksum: 4f30cd4f72d805a5243416be5b39b0928c25687e76d00ee269cce794cca81080
 - filename: .kiro/prompts/opsx-new.prompt.md
@@ -48,9 +50,19 @@ fileignoreconfig:
 - filename: .kiro/prompts/opsx-bulk-archive.prompt.md
   checksum: f3ce90a87aa724e89e064c9c25ea60217cc8cfbaf82f8b9aa21b6fca25173aaa
 - filename: .rubocop.yml
-  checksum: 04ad1f4921bf2f07bcaa1717df0ea16cceaeabeb5ae846211dcd6ea6e6eea979
+  checksum: e6e1ebb47bdd201b0dbcee144cd1321c86947c80dc5c7fff610c12138aa0f72e
 - filename: README.md
   checksum: 3d692725e20da022ceb97d80626c9a11693e14a3d02c759f20ed12fe2aefeeb3
+- filename: bin/merge-repo-trace
+  checksum: 955df41b1be421ff733cf4ce374d6e28d3a3245434d5cd1feb124ef8f0bc482a
+- filename: openspec/changes/adopt-live-docs/proposal.md
+  checksum: 6430f53d557ad1fadeef4312c4585a6225cd0b34e6ba6a7e042c3d17398186eb
+- filename: openspec/changes/adopt-live-docs/tasks.md
+  checksum: 27d538ccb180a4444236542a178a11d8b4faf45884c1f3c9a2214b0aeffe5b43
+- filename: openspec/changes/adopt-live-docs/specs/live-docs-traceability/spec.md
+  checksum: 718475f67ed982f65b862a060e8ed859e81a209a72e65f5470f5de038b184083
+- filename: openspec/changes/adopt-live-docs/design.md
+  checksum: 5865d1ec849117a0bc5935278c51321d921c5976ecfeec5cc950267448713541
 - filename: openspec/changes/archive/2026-11-03-add-guest-name-equality-contract/specs/greeting-core/spec.md
   checksum: 49dabd0a10e6677d37033d41d929f2c44ea9f1606c8ad1f032fcd14be9d580a8
 - filename: openspec/changes/archive/2026-11-03-add-guest-name-equality-contract/proposal.md
@@ -61,6 +73,16 @@ fileignoreconfig:
   checksum: 86b97b50b8a44b63454977e36af684e521f036d9f2895be2951be4d413050cca
 - filename: openspec/changes/archive/2026-11-03-add-guest-name-equality-contract/design.md
   checksum: 8ffc5c2b397050fc7ef010af5533d2e2c84e5807d10acbf91b3ee7960f8b7dc1
+- filename: spec/bin/repo_trace_merge_spec.rb
+  checksum: fedcbac2e01d1e30b263533f72059dbb09fd26c0556b5fbbdb92f0721c63d4bc
+- filename: spec/ci_workflow_spec.rb
+  checksum: a5a6a0623dbd535c73eeec4f6f7f742988de8254e6fa4708e6526af03735eb9e
 - filename: spec/domain/guest_name_spec.rb
-  checksum: cfa5e54c929d15ee68dbbb912ce859f717ba431d4b63f83787ba1c45a9b358b0
+  checksum: 59c3ccbf8d037f6198f2010feb79060906cfab076019e788bb66795603a3cd1f
+- filename: spec/fixtures/repo_trace/statuses_example.rb
+  checksum: 9e7f098db63509929fa3061ae170e63da0edc5998ad8553686cfafff9c250b4c
+- filename: spec/support/repo_trace_formatter.rb
+  checksum: 9bc0833041f1043998e7f6dd082ebfae30f2f3ff5f0da6fcbcc010536878ca66
+- filename: spec/support/repo_trace_formatter_spec.rb
+  checksum: b0be4fb67b659d6cf095560cfab1f13c99842468b825423a36f25c1474fb26fc
 version: ""
