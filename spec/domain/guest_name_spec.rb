@@ -28,7 +28,9 @@ RSpec.describe Greeter::Core::Domain::GuestName do
     end
 
     # Scenario: Normalises casing and whitespace
-    it 'strips surrounding whitespace and title-cases the name' do
+    it 'strips surrounding whitespace and title-cases the name',
+       requirement: 'validates-and-normalises-a-guest-name',
+       scenario: 'normalises-whitespace-and-casing' do
       expect(described_class.new('  alice smith  ').display).to eq('Alice Smith')
     end
 
@@ -47,7 +49,9 @@ RSpec.describe Greeter::Core::Domain::GuestName do
     let(:lower) { described_class.new('alice') }
     let(:upper) { described_class.new('Alice') }
 
-    it 'agrees across ==, eql?, hash, Hash-key lookup, and uniq' do
+    it 'agrees across ==, eql?, hash, Hash-key lookup, and uniq',
+       requirement: 'guestname-is-a-value-object-with-a-consistent-equality-contract',
+       scenario: 'equal-names-agree-across-eql-hash-and-uniq' do
       aggregate_failures 'equality contract' do
         expect(lower).to eq(upper)                # ==
         expect(lower).to eql(upper)               # eql?
@@ -63,12 +67,16 @@ RSpec.describe Greeter::Core::Domain::GuestName do
   # — additional control-character boundary cases
   # ---------------------------------------------------------------------------
   describe 'control-character rejection' do
-    it 'rejects a name containing a null byte' do
+    it 'rejects a name containing a null byte',
+       requirement: 'rejects-names-containing-control-or-escape-characters',
+       scenario: 'rejects-a-name-containing-a-control-or-escape-character' do
       expect { described_class.new("Ali\x00ce") }
         .to raise_error(Greeter::Core::Domain::InvalidGuestName)
     end
 
-    it 'rejects a name containing DEL (0x7F)' do
+    it 'rejects a name containing DEL (0x7F)',
+       requirement: 'rejects-names-containing-control-or-escape-characters',
+       scenario: 'rejects-a-name-containing-a-control-or-escape-character' do
       expect { described_class.new("Ali\x7Fce") }
         .to raise_error(Greeter::Core::Domain::InvalidGuestName)
     end

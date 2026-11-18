@@ -48,7 +48,7 @@ fileignoreconfig:
 - filename: .kiro/prompts/opsx-bulk-archive.prompt.md
   checksum: f3ce90a87aa724e89e064c9c25ea60217cc8cfbaf82f8b9aa21b6fca25173aaa
 - filename: .rubocop.yml
-  checksum: 04ad1f4921bf2f07bcaa1717df0ea16cceaeabeb5ae846211dcd6ea6e6eea979
+  checksum: a3b71384c7e1dfedbd8450815ae7524e17b4aa3c8d420e70fa4b01c0c81237ba
 - filename: README.md
   checksum: 3d692725e20da022ceb97d80626c9a11693e14a3d02c759f20ed12fe2aefeeb3
 - filename: openspec/changes/adopt-live-docs/proposal.md
@@ -69,6 +69,14 @@ fileignoreconfig:
   checksum: 86b97b50b8a44b63454977e36af684e521f036d9f2895be2951be4d413050cca
 - filename: openspec/changes/archive/2026-11-03-add-guest-name-equality-contract/design.md
   checksum: 8ffc5c2b397050fc7ef010af5533d2e2c84e5807d10acbf91b3ee7960f8b7dc1
+- filename: spec/bin/repo_trace_merge_spec.rb
+  checksum: fedcbac2e01d1e30b263533f72059dbb09fd26c0556b5fbbdb92f0721c63d4bc
+- filename: spec/ci_workflow_spec.rb
+  checksum: a5a6a0623dbd535c73eeec4f6f7f742988de8254e6fa4708e6526af03735eb9e
 - filename: spec/domain/guest_name_spec.rb
-  checksum: cfa5e54c929d15ee68dbbb912ce859f717ba431d4b63f83787ba1c45a9b358b0
+  checksum: 59c3ccbf8d037f6198f2010feb79060906cfab076019e788bb66795603a3cd1f
+- filename: spec/fixtures/repo_trace/statuses_example.rb
+  checksum: 9e7f098db63509929fa3061ae170e63da0edc5998ad8553686cfafff9c250b4c
+- filename: spec/support/repo_trace_formatter_spec.rb
+  checksum: b0be4fb67b659d6cf095560cfab1f13c99842468b825423a36f25c1474fb26fc
 version: ""

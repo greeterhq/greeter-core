@@ -33,20 +33,11 @@ RSpec/SpecFilePathSuffix:
   Exclude:
     - "spec/benchmarks/**/*"
 
-RSpec/DescribeClass:
-  Exclude:
-    - "spec/benchmarks/**/*"
-
 # guest_name_spec consolidates the GuestName value-object equality contract
 # (==, eql?, hash, Hash-key lookup, Array#uniq) into one aggregate_failures
 # example, mapping 1:1 to its single OpenSpec scenario. That contract is one
 # cohesive behaviour, so it is asserted as one example rather than five, which
 # needs more than the default 5 lines and more than one expectation.
-RSpec/ExampleLength:
-  Exclude:
-    - "spec/benchmarks/**/*"
-    - "spec/domain/guest_name_spec.rb"
-
 RSpec/MultipleExpectations:
   Exclude:
     - "spec/benchmarks/**/*"
@@ -56,3 +47,37 @@ RSpec/MultipleExpectations:
 RSpec/IdenticalEqualityAssertion:
   Exclude:
     - "spec/testing/fake_clock_spec.rb"
+
+# adopt-live-docs: spec/fixtures/repo_trace holds deliberately trivial example
+# files that the formatter spec runs in a subprocess (passing, failing, skipped
+# and pending on purpose). They are inputs, not tests, so RSpec style cops do
+# not apply to them.
+RSpec:
+  Exclude:
+    - "spec/fixtures/**/*"
+
+# adopt-live-docs: these specs check tooling (slug rule, trace-check, repo-trace
+# formatter, merge script, CI workflow), not a Greeter::Core class. Each
+# scenario's checks are one aggregate_failures example so it maps to its
+# OpenSpec scenario, which needs more than five lines and more than five
+# memoized helpers for the subprocess and fixture paths.
+RSpec/DescribeClass:
+  Exclude:
+    - "spec/benchmarks/**/*"
+    - "spec/support/*_spec.rb"
+    - "spec/trace_check_spec.rb"
+    - "spec/bin/*_spec.rb"
+    - "spec/ci_workflow_spec.rb"
+
+RSpec/ExampleLength:
+  Exclude:
+    - "spec/benchmarks/**/*"
+    - "spec/domain/guest_name_spec.rb"
+    - "spec/support/*_spec.rb"
+    - "spec/bin/*_spec.rb"
+    - "spec/ci_workflow_spec.rb"
+
+RSpec/MultipleMemoizedHelpers:
+  Exclude:
+    - "spec/support/*_spec.rb"
+    - "spec/bin/*_spec.rb"
