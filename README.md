@@ -18,7 +18,7 @@ irb -r greeter/core -r greeter/core/testing <<'RUBY'
 clock    = Greeter::Core::Testing::FixedClock.new
 service  = Greeter::Core::Domain::GreetingService.new(clock: clock)
 greeting = service.greet('alice bonsu')
-puts greeting.guest_name.display   # => Alice Bonsu
+puts greeting.guest_name.display   # prints: Alice Bonsu
 RUBY
 ```
 
@@ -87,7 +87,7 @@ gem uninstall greeter-core
 
 ### smoke-test the packaged load path resolves and behaves
 ```bash
-bundle exec ruby -Ilib -e "require 'greeter/core'; puts Greeter::Core::Domain::GuestName.new('alice bonsu').display" # => Alice Bonsu
+bundle exec ruby -Ilib -e "require 'greeter/core'; puts Greeter::Core::Domain::GuestName.new('alice bonsu').display" # prints: Alice Bonsu
 ```
 
 ### confirm the gem builds cleanly
